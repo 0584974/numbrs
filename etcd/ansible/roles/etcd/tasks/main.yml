@@ -1,0 +1,20 @@
+- name: Copy etcd binaries
+  copy: src={{item}} dest=/usr/local/bin/ owner=root group=root mode=0755
+  with_items:
+    - ../bin/etcd
+    - ../bin/etcdctl
+
+- name: Configure systemd etcd
+  template: src=etcd.service.j2 dest=/etc/systemd/system/etcd.service owner=root group=root mode=0644
+  notify: Restart etcd
+
+- name: Start etcd
+  service: name=etcd state=started enabled=yes
+
+- name: Wait for etcd startup
+  action: shell etcdctl cluster-health
+  register: result
+  until: result.stdout.find("cluster is healthy") != -1
+  retries: 6
+  delay: 10
+

@@ -1,0 +1,8 @@
+---
+
+- name: Restart etcd
+  command: "{{item}}"
+  with_items:
+    - systemctl daemon-reload
+    - systemctl restart etcd
+
